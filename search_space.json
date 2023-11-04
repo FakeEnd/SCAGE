@@ -1,0 +1,10 @@
+{
+  "task": {"_type": "choice", "_value": ["clintox"]},
+  "init_lr": {"_type": "choice", "_value": [0.0002, 0.002, 0.001, 0.01]},
+  "weight_decay": {"_type": "choice", "_value": ["2e-5", "1e-4", "1e-3", "1e-2"]},
+  "batch_size": {"_type": "choice", "_value": [64, 128, 256]},
+  "seed": {"_type": "randint", "_value": [1, 99999]},
+  "num_layers": {"_type": "choice", "_value": [1, 2, 3, 4]},
+  "dropout": {"_type": "uniform", "_value": [0.0, 0.2]},
+  "hidden_dim": {"_type": "choice", "_value": [64, 128, 256, 512]}
+}

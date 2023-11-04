@@ -1,0 +1,8 @@
+{
+  "task": {"_type": "choice", "_value": ["bbbp"]},
+  "batch_size": {"_type": "choice", "_value": [64, 128, 256]},
+  "seed": {"_type": "randint", "_value": [1, 99999]},
+  "num_layers": {"_type": "choice", "_value": [1, 2, 3, 4]},
+  "dropout": {"_type": "uniform", "_value": [0.0, 0.2]},
+  "hidden_dim": {"_type": "choice", "_value": [64, 128, 256, 512]}
+}

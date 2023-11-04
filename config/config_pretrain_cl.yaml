@@ -1,0 +1,84 @@
+task_name: pubchem_250
+batch_size: 32
+seed: 9
+epochs: 100
+
+root: /mnt/solid/tss/Project-2023/SCAGE2.0/data/pretrain_data/
+is_pretrain: True
+
+save_ckpt: 10
+save_model: best_valid
+checkpoint: False
+DP: False
+
+loss:
+  type: NTXentLoss
+  param:
+    temperature: 0.1
+    use_cosine_similarity: True
+
+
+optim:
+  type: adam
+  init_lr: 0.0001
+  weight_decay: '0'
+
+lr_scheduler:
+  type: cos
+  warm_up_epoch: 5
+  start_lr: 0.00001
+
+
+model:
+  use_sms: True
+  # transformer layer
+  num_encoder_layers: 3
+  hidden_dim: 128
+  ffn_hidden_dim: 128
+  num_attn_heads: 2
+  emb_dropout: 0.5
+  dropout: 0.5
+  attn_dropout: 0.5
+  dist_bar: [3, 6, 9]
+  encoder_normalize_before: True
+  apply_graphormer_init: True
+  activation_fn: GELU
+  n_trans_layers_to_freeze: 0
+
+  use_super_node: True
+  graph_pooling: afps      # mean, afps
+  afps_k: 10
+
+  # 是否使用额外特征
+  node_level_modules:
+    - degree
+  attn_level_modules:
+    - geometry
+  attn_mask_modules: None
+
+  # PE
+  num_in_degree: 512
+  num_out_degree: 512
+  eig_pos_dim: 3
+  svd_pos_dim: 3
+
+  # AT
+  num_spatial: 512  # 最短路径的数目
+  num_edges: 1536  # 512*3
+  num_edge_dis: 128
+  edge_type: multi_hop
+  multi_hop_max_dist: 5
+  num_hop_bias: 3   # 2/3/4
+
+  # GNN
+  use_gnn_layers: True
+  residual: True
+  gnn_insert_pos: before
+  num_gnn_layers: 2
+  JK: last
+  gnn_type: gin
+  gnn_dropout: 0.3
+
+  # collator
+  max_node: 512
+  spatial_pos_max: 20

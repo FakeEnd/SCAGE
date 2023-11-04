@@ -1,0 +1,17 @@
+experimentName: clintox
+searchSpaceFile: search_space.json
+trialCommand: python finetune_nni.py
+trialCodeDirectory: .
+trialGpuNumber: 1
+trialConcurrency: 2
+maxExperimentDuration: 24h
+maxTrialNumber: 100
+tuner:
+  name: TPE
+  classArgs:
+    optimize_mode: maximize
+trainingService:
+  platform: local
+  useActiveGpu: True
+
+
