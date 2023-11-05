@@ -254,7 +254,7 @@ class PreTrainer(object):
             edge_logit = self.view(batch_raw, atom_rep)  # 计算边的概率
             batch_aug_edge_weight = reparame_trick(edge_logit)  # 重参数化
             # batch_mask['batch_aug_edge_weight'] = batch_aug_edge_weight
-            batch_mask['edge_weight'] = batch_aug_edge_weight.detach()
+            batch_mask['edge_weight'] = batch_aug_edge_weight
             mol_rep_aug, _, _ = self.model(batch_mask)
 
 

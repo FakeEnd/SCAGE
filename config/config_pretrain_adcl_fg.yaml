@@ -1,6 +1,6 @@
 #task_name: pubchem_1000
-task_name: pubchem_1000_trick
-#task_name: pubchem_250
+#task_name: pubchem_1000_trick
+task_name: pubchem_250
 #task_name: pubchem_250_trick
 #task_name: pubchem_demo5
 #task_name: cliff_data
