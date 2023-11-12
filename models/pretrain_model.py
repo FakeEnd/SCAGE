@@ -11,7 +11,7 @@ def reparame_trick(edge_logit):
     gate_inputs = torch.log(eps) - torch.log(1 - eps)
     gate_inputs = gate_inputs.to('cuda')
     gate_inputs = (gate_inputs + edge_logit) / temperature
-    batch_aug_edge_weight = torch.sigmoid(gate_inputs).squeeze().detach()
+    batch_aug_edge_weight = torch.sigmoid(gate_inputs).squeeze()
     return batch_aug_edge_weight
 
 

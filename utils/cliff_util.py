@@ -12,7 +12,6 @@ from rdkit.Chem.rdMMPA import FragmentMol
 
 def find_fc(a: float, b: float):
     """Get the fold change of to bioactivities (deconvert from log10 if needed)"""
-
     return max([a, b]) / min([a, b])
 
 

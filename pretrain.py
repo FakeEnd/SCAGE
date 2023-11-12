@@ -1,6 +1,14 @@
+# !/usr/bin/python3
+# --coding:utf-8--
+# @File: pretrain.py
+# @Author:junru jin
+# @Time: 2023年11月12日06
+# @description:
+
+import argparse
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2'
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+import time
+
 import yaml
 import shutil
 import numpy as np
@@ -10,11 +18,14 @@ from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import torchmetrics
+
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 from utils.public_util import set_seed
 from utils.loss_util import NTXentLoss
+from utils.training_util import write_record, copyfile
 from utils.scheduler_util import *
 
 from data_process.loader import PretrainDataset
@@ -22,23 +33,11 @@ from data_process.data_transform import MaskTransformFn
 from data_process.data_collator import pretrain_collator
 from models.pretrain_model import MolGraphCL, ViewLearner, reparame_trick, regular_trick
 import warnings
+
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '3,2,1,0'
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 warnings.filterwarnings("ignore")
-
-
-def write_record(path, message):
-    file_obj = open(path, 'a')
-    file_obj.write('{}\n'.format(message))
-    file_obj.close()
-
-
-def copyfile(srcfile, path):
-    if not os.path.isfile(srcfile):
-        print(f"{srcfile} not exist!")
-    else:
-        fpath, fname = os.path.split(srcfile)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        shutil.copy(srcfile, os.path.join(path, fname))
 
 
 class PreTrainer(object):
@@ -52,24 +51,28 @@ class PreTrainer(object):
         self.lr_scheduler = self._get_lr_scheduler()
 
         if config['checkpoint']:
+            print('loading check point')
             self.load_ckpt(self.config['checkpoint'])
         else:
             self.start_epoch = 1
             self.optim_steps = 0
             self.best_loss = np.inf
-            self.writer = SummaryWriter('{}/{}/{}_{}_{}'.format(
-                'pretrain_result', 'adcl_result', config['task_name'], config['seed'],
-                datetime.now().strftime('%b%d_%H:%M')))
+            self.writer = SummaryWriter('{}/{}/{}/{}_{}_{}'.format(
+                'pretrain_model', self.config['pretrain_task'], self.config['pretrain_mode'], config['task_name'], config['seed'],
+                datetime.now().strftime('%b%d_%H_%M')))
         self.txtfile = os.path.join(self.writer.log_dir, 'record.txt')
         copyfile(file_path, self.writer.log_dir)
 
     def get_data_loaders(self):
-        dataset = PretrainDataset(self.config['root'] + self.config['task_name'],
-                                transform=MaskTransformFn(self.config))
+        # dataset = PretrainDataset(self.config['root'] + self.config['task_name'],
+        #                         transform=MaskTransformFn(self.config))
+        dataset = PretrainDataset(self.config['root'] + self.config['task_name'])
         print('all_dataset_num:', len(dataset))
         loader = DataLoader(dataset,
                             batch_size=self.config['batch_size'],
                             shuffle=True,
+                            prefetch_factor=16,
+                            pin_memory=True,
                             num_workers=16,
                             collate_fn=lambda x: pretrain_collator(x, self.config['model']),
                             drop_last=False)
@@ -133,55 +136,73 @@ class PreTrainer(object):
             raise ValueError('not supported learning rate scheduler!')
 
     def _train_step(self):
-        self.model.train()
         view_loss_all = 0
         model_loss_all = 0
         reg_all = 0
-        for batch_raw, batch_mask in tqdm(self.loader, leave=False, ascii=True):
-            self.view.train()
-            self.view_optim.zero_grad()
-            self.model.eval()
+        batch_index = 0
 
+        for batch_raw, batch_mask in tqdm(self.loader, leave=False, ascii=True):
             batch_raw = {key: value.to('cuda') for key, value in batch_raw.items()
                          if value is not None and not isinstance(value, list)}
             batch_mask = {key: value.to('cuda') for key, value in batch_mask.items()
                           if value is not None and not isinstance(value, list)}
-            # print(batch_raw['fg'])
-            batch_raw['edge_weight'] = None
-            mol_rep_raw, atom_rep = self.model(batch_raw)
-            edge_logit = self.view(batch_raw, atom_rep)  # 计算边的概率
-            batch_aug_edge_weight = reparame_trick(edge_logit)  # 重参数化
 
-            batch_mask['edge_weight'] = batch_aug_edge_weight
-            mol_rep_aug, _ = self.model(batch_mask)
+            if self.config['pretrain_mode'] == 'ad':
+                self.view.train()
+                self.view_optim.zero_grad()
+                self.model.eval()
 
-            reg = regular_trick(batch_raw, batch_aug_edge_weight)  # 正则化
+                batch_raw['edge_weight'] = None
+                mol_rep_raw, atom_rep, fg_out = self.model(batch_raw)
+                edge_logit = self.view(batch_raw, atom_rep)  # 计算边的概率
+                batch_aug_edge_weight = reparame_trick(edge_logit)  # 重参数化
 
-            if self.config['DP']:
-                view_loss = self.model.module.loss_cl(mol_rep_raw, mol_rep_aug) - (self.config['reg_lambda'] * reg)
-            else:
-                view_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug) - (self.config['reg_lambda'] * reg)
-            view_loss_all += view_loss.item()
-            reg_all += reg.item()
-            # gradient ascent formulation
-            (-view_loss).backward()
-            self.view_optim.step()
+                batch_mask['edge_weight'] = batch_aug_edge_weight
+                mol_rep_aug, _, _ = self.model(batch_mask)
 
+                reg = regular_trick(batch_raw, batch_aug_edge_weight)  # 正则化
+
+                # print('mol_rep_raw.size=', mol_rep_raw.size())
+                # print('mol_rep_aug.size=', mol_rep_aug.size())
+                if self.config['pretrain_task'] == 'cl':
+                    view_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug) - (self.config['reg_lambda'] * reg)
+                elif self.config['pretrain_task'] == 'fg':
+                    view_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug) - (self.config['reg_lambda'] * reg) + self.model.loss_fg(fg_out, batch_raw['fg'])
+                else:
+                    raise ValueError('not supported pretrain task!')
+
+                view_loss_all += view_loss.item()
+                reg_all += reg.item()
+                # gradient ascent formulation
+                (-view_loss).backward()
+                self.view_optim.step()
+
+            # train model to minimize contrastive loss
             self.model.train()
             self.view.eval()
-            # train model to minimize contrastive loss
             self.model_optim.zero_grad()
 
-            mol_rep_raw, atom_rep = self.model(batch_raw)
-            edge_logit = self.view(batch_raw, atom_rep)  # 计算边的概率
-            batch_aug_edge_weight = reparame_trick(edge_logit)  # 重参数化
-            batch_mask['batch_aug_edge_weight'] = batch_aug_edge_weight
-            mol_rep_aug, _ = self.model(batch_mask)
+            if self.config['pretrain_mode'] == 'cl':
+                batch_raw['edge_weight'], batch_mask['edge_weight'] = None, None
 
-            if self.config['DP']:
-                model_loss = self.model.module.loss_cl(mol_rep_raw, mol_rep_aug)
-            else:
+            mol_rep_raw, atom_rep, fg_out = self.model(batch_raw)
+
+            if self.config['pretrain_mode'] == 'ad':
+                edge_logit = self.view(batch_raw, atom_rep)  # 计算边的概率
+                batch_aug_edge_weight = reparame_trick(edge_logit)  # 重参数化
+                batch_mask['edge_weight'] = batch_aug_edge_weight.detach()
+
+            mol_rep_aug, _, _ = self.model(batch_mask)
+
+            # print('batch_raw.fg.size=', batch_raw['fg'].size())
+            # fg_out, fg_loss = self.fg_pred(batch_raw)
+
+            if self.config['pretrain_task'] == 'cl':
                 model_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug)
+            elif self.config['pretrain_task'] == 'fg':
+                model_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug) + self.model.loss_fg(fg_out, batch_raw['fg'])
+            else:
+                raise ValueError('not supported pretrain task!')
 
             model_loss_all += model_loss.item()
             # standard gradient descent formulation
@@ -189,20 +210,27 @@ class PreTrainer(object):
             self.model_optim.step()
 
             self.writer.add_scalar('model_loss', model_loss, global_step=self.optim_steps)
-            self.writer.add_scalar('view_loss', view_loss, global_step=self.optim_steps)
+
+            if self.config['pretrain_task'] == 'ad':
+                self.writer.add_scalar('view_loss', view_loss, global_step=self.optim_steps)
 
             self.optim_steps += 1
+
+            # if (batch_index + 1) % 100 == 0 or batch_index == total_step - 1:
+            #     acc = test_acc(fg_out.softmax(dim=-1), batch_raw['fg'])
+            #     print()
+            #     print(f'Accuracy on batch {batch_index}: {acc}')
+
+            batch_index += 1
+
         model_loss_mean = model_loss_all / len(self.loader)
         view_loss_mean = view_loss_all / len(self.loader)
         reg_mean = reg_all / len(self.loader)
         return model_loss_mean, view_loss_mean, reg_mean
 
     def save_ckpt(self, epoch):
-        model_dict = {
-            'model': self.model.state_dict()
-        }
         checkpoint = {
-            "net": model_dict,
+            "model": self.model.state_dict(),
             'model_optim': self.model_optim.state_dict(),
             'view_optim': self.view_optim.state_dict(),
             "epoch": epoch,
@@ -215,8 +243,9 @@ class PreTrainer(object):
 
     def load_ckpt(self, load_pth):
         checkpoint = torch.load(load_pth, map_location='cuda')
+        # print(checkpoint)
         self.writer = SummaryWriter(os.path.dirname(load_pth))
-        self.model.load_state_dict(checkpoint['net']['model'])
+        self.model.load_state_dict(checkpoint['model'])
         self.model_optim.load_state_dict(checkpoint['model_optim'])
         self.view_optim.load_state_dict(checkpoint['view_optim'])
         self.start_epoch = checkpoint['epoch'] + 1
@@ -224,7 +253,6 @@ class PreTrainer(object):
         self.optim_steps = checkpoint['optim_steps']
 
     def train(self):
-        # print(self.config)
         write_record(self.txtfile, self.config)
         for i in range(self.start_epoch, self.config['epochs'] + 1):
             if self.config['lr_scheduler']['type'] in ['cos', 'square', 'linear']:
@@ -255,7 +283,7 @@ class PreTrainer(object):
 
 
 if __name__ == '__main__':
-    path = "config/config_pretrain_adcl.yaml"
+    path = "config/config_pretrain.yaml"
     config = yaml.load(open(path, "r"), Loader=yaml.FullLoader)
     print(config['task_name'])
     set_seed(config['seed'])

@@ -1,15 +1,32 @@
+#task_name: pubchem_1000
+#task_name: pubchem_1000_trick
 task_name: pubchem_250
-batch_size: 32
+#task_name: pubchem_250_trick
+#task_name: cliff_data
+batch_size: 256                     # batch size
 seed: 9
-epochs: 100
+epochs: 100                     # total number of epochs
 
-root: /mnt/solid/tss/Project-2023/SCAGE2.0/data/pretrain_data/
+# pretrain是否采用对抗训练
+#pretrain_mode: ad
+pretrain_mode: cl
+
+# pretrain的loss是否加入官能团
+#pretrain_task: fg
+pretrain_task: cl
+
+root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_data/
+#root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/
 is_pretrain: True
 
-save_ckpt: 10
+save_ckpt: 1
 save_model: best_valid
 checkpoint: False
-DP: True
+#checkpoint: /mnt/8t/qjb/workspace/SCAGE2.0/pretrain_result/model_5.pth
+
+DP: False
+#DP: True
+DDP: True
 reg_lambda: 1
 
 loss:
@@ -21,8 +38,8 @@ loss:
 
 optim:
   type: adam
-  init_lr: 0.0001                 # initial learning rate for the prediction head
-  weight_decay: '0'              # weight decay of Adam
+  init_lr: 0.0001
+  weight_decay: '0'
 
 lr_scheduler:
   type: cos
@@ -33,25 +50,26 @@ lr_scheduler:
 model:
   use_sms: True
   # transformer layer
-  num_encoder_layers: 3
+  num_encoder_layers: 5
   hidden_dim: 128
   ffn_hidden_dim: 128
-  num_attn_heads: 4
-  emb_dropout: 0.1
-  dropout: 0.1
-  attn_dropout: 0.1
-  dist_bar: [1, 2, 3]
+  num_attn_heads: 2
+  emb_dropout: 0.5
+  dropout: 0.5
+  attn_dropout: 0.5
+  dist_bar: [ 3, 6, 9 ]
   encoder_normalize_before: True
   apply_graphormer_init: True
   activation_fn: GELU
   n_trans_layers_to_freeze: 0
 
   use_super_node: True
-  graph_pooling: afps
+  graph_pooling: afps # mean, afps
   afps_k: 10
 
   # 是否使用额外特征
-  node_level_modules: None
+  node_level_modules:
+    - degree
   attn_level_modules:
     - geometry
   attn_mask_modules: None
@@ -82,14 +100,3 @@ model:
   # collator
   max_node: 512
   spatial_pos_max: 20
-
-
-gnn_model:
-  num_layer: 4
-  emb_dim: 128
-  JK: 'last'
-  drop_ratio: 0.5
-  gnn_type: 'gin'
-  graph_pooling: 'mean'
-  num_tasks: 1
-  batch_norm: True

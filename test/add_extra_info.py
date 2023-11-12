@@ -14,7 +14,7 @@ pyximport.install(setup_args={"include_dirs": np.get_include()})
 from data_process import algos
 from utils import data_util
 
-config_path = "config/config_pretrain_adcl_fg.yaml"
+config_path = "../config/config_pretrain_adcl_fg.yaml"
 config = yaml.load(open(config_path, "r"), Loader=yaml.FullLoader)
 config = config['model']
 
