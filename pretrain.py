@@ -35,8 +35,8 @@ from models.pretrain_model import MolGraphCL, ViewLearner, reparame_trick, regul
 import warnings
 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '3,2,1,0'
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+# os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 warnings.filterwarnings("ignore")
 
 

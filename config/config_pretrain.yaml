@@ -12,8 +12,8 @@ epochs: 100                     # total number of epochs
 pretrain_mode: cl
 
 # pretrain的loss是否加入官能团
-#pretrain_task: fg
-pretrain_task: cl
+pretrain_task: fg
+#pretrain_task: cl
 
 root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_data/
 #root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/

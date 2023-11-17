@@ -14,7 +14,7 @@ searchSpacePath: search_space.json
 useAnnotation: false # 如果 useAnnotation 为 true，searchSpacePath 字段会被删除。
 
 # 日志
-logDir: ./log  # 可选。 目录的路径。 默认值：<user home directory>/nni-experiments
+logDir: log  # 可选。 目录的路径。 默认值：<user home directory>/nni-experiments
 logLevel: info
 
 # 调参器
