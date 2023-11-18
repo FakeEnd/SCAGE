@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=3 nohup python pretrain.py > ./pretrain_log/pretrain5.log 2>&1 &

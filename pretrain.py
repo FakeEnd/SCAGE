@@ -231,6 +231,7 @@ class PreTrainer(object):
     def save_ckpt(self, epoch):
         checkpoint = {
             "model": self.model.state_dict(),
+            'view': self.view.state_dict(),
             'model_optim': self.model_optim.state_dict(),
             'view_optim': self.view_optim.state_dict(),
             "epoch": epoch,
@@ -246,6 +247,8 @@ class PreTrainer(object):
         # print(checkpoint)
         self.writer = SummaryWriter(os.path.dirname(load_pth))
         self.model.load_state_dict(checkpoint['model'])
+        # some old version before nov 20 will reuslt in error
+        self.view.load_state_dict(checkpoint['view'])
         self.model_optim.load_state_dict(checkpoint['model_optim'])
         self.view_optim.load_state_dict(checkpoint['view_optim'])
         self.start_epoch = checkpoint['epoch'] + 1

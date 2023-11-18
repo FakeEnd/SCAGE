@@ -126,7 +126,7 @@ class Trainer(object):
             state_dict = torch.load(self.config['pretrain_model_path'],
                                     map_location='cuda')
             # model.model.load_model_state_dict(state_dict['model'])
-            model.model.load_model_state_dict(state_dict['net']['model'])
+            model.model.load_model_state_dict(state_dict['model'])
             print("Loading pretrain model from", self.config['pretrain_model_path'])
         return model
 

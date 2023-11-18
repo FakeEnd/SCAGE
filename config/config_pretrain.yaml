@@ -1,7 +1,8 @@
 #task_name: pubchem_1000
 #task_name: pubchem_1000_trick
-task_name: pubchem_250
+#task_name: pubchem_250
 #task_name: pubchem_250_trick
+task_name: pubchem_downstream
 #task_name: cliff_data
 batch_size: 256                     # batch size
 seed: 9
@@ -12,8 +13,8 @@ epochs: 100                     # total number of epochs
 pretrain_mode: cl
 
 # pretrain的loss是否加入官能团
-pretrain_task: fg
-#pretrain_task: cl
+#pretrain_task: fg
+pretrain_task: cl
 
 root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_data/
 #root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/
@@ -22,6 +23,7 @@ is_pretrain: True
 save_ckpt: 1
 save_model: best_valid
 checkpoint: False
+#checkpoint: /mnt/8t/qjb/workspace/SCAGE2.0/pretrain_result/model_5.pth
 #checkpoint: /mnt/8t/qjb/workspace/SCAGE2.0/pretrain_result/model_5.pth
 
 DP: False
