@@ -107,7 +107,7 @@ class Trainer(object):
 
         optim_type = self.config['optim']['type']
         lr = self.config['optim']['init_lr']
-        weight_decay = eval(self.config['optim']['weight_decay'])
+        weight_decay = self.config['optim']['weight_decay']
 
         layer_list = []
         for name, param in self.net.named_parameters():

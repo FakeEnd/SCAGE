@@ -2,7 +2,7 @@
 authorName: clintox  # 必填
 experimentName: clintox  # 必填
 
-trialConcurrency: 32 # 必填，指定同时运行的 Trial 任务的最大数量。
+trialConcurrency: 2 # 必填，指定同时运行的 Trial 任务的最大数量。
 # ！ 如果 trialGpuNum 大于空闲的 GPU 数量，并且并发的 Trial 任务数量还没达到 trialConcurrency，Trial 任务会被放入队列，等待分配 GPU 资源。
 
 maxExecDuration: 72h #  可选。 整个调参过程最长运行时间。 默认值：999d。
@@ -33,8 +33,8 @@ trial:
 
 # 本机模式下配置，可选。
 localConfig:
-  gpuIndices: 0, 1, 2, 3 # 默认值none。设置后，只有指定的 GPU 会被用来运行 Trial 任务。
+  gpuIndices: 0 # 默认值none。设置后，只有指定的 GPU 会被用来运行 Trial 任务。
   # ! 和CUDA_VISIBLE_DEVICE=0,3 的效果相同，在程序内部的gpu编号依旧是从0开始的
-  maxTrialNumPerGpu: 8 #  默认值1。指定1个GPU上最大并发trail的数量
+  maxTrialNumPerGpu: 2 #  默认值1。指定1个GPU上最大并发trail的数量
   useActiveGpu: True #  默认值false。是否使用已经被其他进程使用的gpu。
 

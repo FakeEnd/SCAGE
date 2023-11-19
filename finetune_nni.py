@@ -27,11 +27,18 @@ from models.finetune_model import DownstreamModel
 
 import nni
 params_nni = {
-    'task': 'lipophilicity',
-    'init_lr': 0.0002,
-    'weight_decay': 2e-5,
-    'batch_size': 128,
     'seed': 1,
+    'batch_size': 128,
+    'task': 'lipophilicity',
+
+    'init_lr': 0.0002,
+    'init_base_lr': 0.0001,
+    'weight_decay': 2e-5,
+
+    'scheduler_type': None,
+    'warm_up_epoch': 5,
+    'start_lr': 5e-4,
+
     'num_layers': 3,
     'hidden_dim': 256,
     'dropout': 0.08
@@ -66,12 +73,6 @@ class Trainer(object):
         self.criterion = self._get_loss_fn()
         self.optim = self._get_optim()
         self.lr_scheduler = self._get_lr_scheduler()
-
-        config['batch_size'] = params_nni['batch_size']
-        config['seed'] = params_nni['seed']
-        config['DownstreamModel']['num_layers'] = params_nni['num_layers']
-        config['DownstreamModel']['hidden_dim'] = params_nni['hidden_dim']
-        config['DownstreamModel']['dropout'] = params_nni['dropout']
 
         if config['checkpoint']:
             self.load_ckpt(self.config['checkpoint'])
@@ -148,7 +149,7 @@ class Trainer(object):
 
         optim_type = self.config['optim']['type']
         lr = self.config['optim']['init_lr']
-        weight_decay = eval(self.config['optim']['weight_decay'])
+        weight_decay = self.config['optim']['weight_decay']
 
         layer_list = []
         for name, param in self.net.named_parameters():
@@ -377,9 +378,23 @@ class Trainer(object):
 if __name__ == '__main__':
     path = f"config/config_finetune.yaml"
     config = yaml.load(open(path, "r"), Loader=yaml.FullLoader)
+
     config['task_name'] = params_nni['task']
+    config['batch_size'] = params_nni['batch_size']
+    config['seed'] = params_nni['seed']
+
     config['optim']['init_lr'] = params_nni['init_lr']
+    config['optim']['init_base_lr'] = params_nni['init_base_lr']
     config['optim']['weight_decay'] = params_nni['weight_decay']
+
+    config['lr_scheduler']['type'] = params_nni['type']
+    config['lr_scheduler']['warm_up_epoch'] = params_nni['warm_up_epoch']
+    config['lr_scheduler']['start_lr'] = params_nni['start_lr']
+
+    config['DownstreamModel']['num_layers'] = params_nni['num_layers']
+    config['DownstreamModel']['hidden_dim'] = params_nni['hidden_dim']
+    config['DownstreamModel']['dropout'] = params_nni['dropout']
+
     print(config['task_name'])
     set_seed(params_nni['seed'])
     get_downstream_task_names(config)
