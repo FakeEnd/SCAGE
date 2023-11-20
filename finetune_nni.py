@@ -387,7 +387,7 @@ if __name__ == '__main__':
     config['optim']['init_base_lr'] = params_nni['init_base_lr']
     config['optim']['weight_decay'] = params_nni['weight_decay']
 
-    config['lr_scheduler']['type'] = params_nni['type']
+    config['lr_scheduler']['type'] = params_nni['scheduler_type']
     config['lr_scheduler']['warm_up_epoch'] = params_nni['warm_up_epoch']
     config['lr_scheduler']['start_lr'] = params_nni['start_lr']
 
