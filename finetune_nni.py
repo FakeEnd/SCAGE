@@ -27,17 +27,17 @@ from models.finetune_model import DownstreamModel
 
 import nni
 params_nni = {
-    'seed': 1,
+    'seed': 0,
     'batch_size': 128,
     'task': 'lipophilicity',
 
     'init_lr': 0.0002,
-    'init_base_lr': 0.0001,
+    # 'init_base_lr': 0.0001,
     'weight_decay': 2e-5,
 
-    'scheduler_type': None,
-    'warm_up_epoch': 5,
-    'start_lr': 5e-4,
+    # 'scheduler_type': None,
+    # 'warm_up_epoch': 5,
+    # 'start_lr': 5e-4,
 
     'num_layers': 3,
     'hidden_dim': 256,
@@ -384,19 +384,19 @@ if __name__ == '__main__':
     config['seed'] = params_nni['seed']
 
     config['optim']['init_lr'] = params_nni['init_lr']
-    config['optim']['init_base_lr'] = params_nni['init_base_lr']
     config['optim']['weight_decay'] = params_nni['weight_decay']
 
-    config['lr_scheduler']['type'] = params_nni['scheduler_type']
-    config['lr_scheduler']['warm_up_epoch'] = params_nni['warm_up_epoch']
-    config['lr_scheduler']['start_lr'] = params_nni['start_lr']
+    # config['lr_scheduler']['type'] = params_nni['scheduler_type']
+    # config['lr_scheduler']['warm_up_epoch'] = params_nni['warm_up_epoch']
+    # config['lr_scheduler']['start_lr'] = params_nni['start_lr']
 
     config['DownstreamModel']['num_layers'] = params_nni['num_layers']
     config['DownstreamModel']['hidden_dim'] = params_nni['hidden_dim']
     config['DownstreamModel']['dropout'] = params_nni['dropout']
 
     print(config['task_name'])
-    set_seed(params_nni['seed'])
+    # set_seed(params_nni['seed'])
+    set_seed(config['seed'])
     get_downstream_task_names(config)
 
     trainer = Trainer(config, path)
