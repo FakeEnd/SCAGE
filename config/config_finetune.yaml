@@ -13,6 +13,7 @@ save_ckpt: 50
 save_model: best_valid
 #pretrain_model_path: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_result/adcl_fg_result/pubchem_250_trick_9_Oct30_22:27/checkpoint/model_40.pth
 #pretrain_model_path: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_model/original/pubchem_250_9_Nov02_10_46/model.pth
+#pretrain_model_path: /archive/bioinformatics/Zhou_lab/shared/jjin/SCAGE/pretrain_model/cl/cl/pubchem_downstream_9_Nov17_23_37/model.pth
 pretrain_model_path: None
 
 checkpoint: False
