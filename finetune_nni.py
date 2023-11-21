@@ -105,19 +105,19 @@ class Trainer(object):
                                   shuffle=True,
                                   num_workers=4,
                                   collate_fn=lambda x: collator_finetune(x, self.config['model']),
-                                  drop_last=True)
+                                  drop_last=False)
         val_loader = DataLoader(val_dataset,
                                 batch_size=self.config['batch_size'],
                                 shuffle=False,
                                 num_workers=4,
                                 collate_fn=lambda x: collator_finetune(x, self.config['model']),
-                                drop_last=True)
+                                drop_last=False)
         test_loader = DataLoader(test_dataset,
                                  batch_size=self.config['batch_size'],
                                  shuffle=False,
                                  num_workers=4,
                                  collate_fn=lambda x: collator_finetune(x, self.config['model']),
-                                 drop_last=True)
+                                 drop_last=False)
 
         return train_loader, val_loader, test_loader
 
@@ -393,6 +393,13 @@ if __name__ == '__main__':
     config['DownstreamModel']['num_layers'] = params_nni['num_layers']
     config['DownstreamModel']['hidden_dim'] = params_nni['hidden_dim']
     config['DownstreamModel']['dropout'] = params_nni['dropout']
+
+    config['model']['dist_bar'] = params_nni['dist_bar']
+    config['model']['dropout'] = params_nni['pretrain_dropout']
+    config['model']['attn_dropout'] = params_nni['attn_dropout']
+    config['model']['emb_dropout'] = params_nni['emb_dropout']
+    config['model']['num_encoder_layers'] = params_nni['num_encoder_layers']
+    config['model']['num_attn_heads'] = params_nni['num_attn_heads']
 
     print(config['task_name'])
     # set_seed(params_nni['seed'])

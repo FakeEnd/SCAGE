@@ -42,3 +42,35 @@ unset https_proxy
 ```bash
 nnictl create --config ./config.yaml -p 3325
 ```
+
+## experimental results
+
+[tencent document link](https://docs.qq.com/sheet/DVnVEYk96b0p5WkVR?tab=000001)
+
+close nni and then view it again
+
+```bash
+nnictl stop --port 3329
+nnictl stop -a
+```
+
+```bash
+nnictl view omFiEsra --port 3328 -e /archive/bioinformatics/Zhou_lab/shared/jjin/SCAGE/log
+```
+
+### 1. fintune on no pretrain
+
+![img.png](imgs/fintune_on_no_pretrain/img.png)
+
+<details>
+<summary>some other results</summary>
+<p>
+
+![img_1.png](imgs/fintune_on_no_pretrain/img_1.png)
+
+![img_2.png](imgs/fintune_on_no_pretrain/img_2.png)
+
+![img_3.png](imgs/fintune_on_no_pretrain/img_3.png)
+</p>
+ </details>
+
