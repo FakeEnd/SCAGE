@@ -162,8 +162,8 @@ class PreTrainer(object):
 
                 reg = regular_trick(batch_raw, batch_aug_edge_weight)  # 正则化
 
-                # print('mol_rep_raw.size=', mol_rep_raw.size())
-                # print('mol_rep_aug.size=', mol_rep_aug.size())
+                print('mol_rep_raw.size=', mol_rep_raw.size())
+                print('mol_rep_aug.size=', mol_rep_aug.size())
                 if self.config['pretrain_task'] == 'cl':
                     view_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug) - (self.config['reg_lambda'] * reg)
                 elif self.config['pretrain_task'] == 'fg':
@@ -196,6 +196,9 @@ class PreTrainer(object):
 
             # print('batch_raw.fg.size=', batch_raw['fg'].size())
             # fg_out, fg_loss = self.fg_pred(batch_raw)
+
+            # print('mol_rep_raw.size=', mol_rep_raw.size())
+            # print('mol_rep_aug.size=', mol_rep_aug.size())
 
             if self.config['pretrain_task'] == 'cl':
                 model_loss = self.model.loss_cl(mol_rep_raw, mol_rep_aug)

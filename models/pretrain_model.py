@@ -92,6 +92,7 @@ class MolGraphCL(nn.Module):
     def loss_cl(self, x1, x2):
         T = 0.2
         # print('x1.size()=', x1.size())
+        # print('x2.size()=', x2.size())
         batch_size, _ = x1.size()
         x1_abs = x1.norm(dim=1)
         x2_abs = x2.norm(dim=1)

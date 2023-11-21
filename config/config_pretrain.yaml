@@ -4,7 +4,8 @@
 #task_name: pubchem_250_trick
 task_name: pubchem_downstream
 #task_name: cliff_data
-batch_size: 256                     # batch size
+#batch_size: 256                     # batch size
+batch_size: 128                     # batch size
 seed: 9
 epochs: 100                     # total number of epochs
 
@@ -66,7 +67,7 @@ model:
   n_trans_layers_to_freeze: 0
 
   use_super_node: True
-  graph_pooling: afps # mean, afps
+  graph_pooling: afps
   afps_k: 10
 
   # 是否使用额外特征

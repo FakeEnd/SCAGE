@@ -1,7 +1,7 @@
 {
   "task": {"_type": "choice", "_value": ["clintox"]},
   "batch_size": {"_type": "choice", "_value": [32, 64, 128]},
-  "seed": {"_type": "randint", "_value": [1, 99999]},
+  "seed": {"_type": "choice", "_value": [3, 2, 6]},
 
   "init_lr": {"_type": "uniform", "_value": [0.0005, 0.5]},
   "init_base_lr": {"_type": "uniform", "_value": [0.0005, 0.5]},
