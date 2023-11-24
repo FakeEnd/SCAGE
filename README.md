@@ -74,3 +74,12 @@ nnictl view omFiEsra --port 3328 -e /archive/bioinformatics/Zhou_lab/shared/jjin
 </p>
  </details>
 
+### 2. fintune on no pretrain with pretrain parameters
+
+![img.png](imgs/fintune_on_no_pretrain_with_pretrain_parameter/img.png)
+
+Some conclusions:
+- Choose dist bar as [1,2,3]
+- Choose dropout to 0.3/0.4
+- Choose number encoder 4
+- Choose number layer 4

@@ -53,14 +53,14 @@ lr_scheduler:
 model:
   use_sms: True
   # transformer layer
-  num_encoder_layers: 5
+  num_encoder_layers: 4
   hidden_dim: 128
   ffn_hidden_dim: 128
-  num_attn_heads: 2
-  emb_dropout: 0.5
-  dropout: 0.5
-  attn_dropout: 0.5
-  dist_bar: [ 3, 6, 9 ]
+  num_attn_heads: 4
+  emb_dropout: 0.4
+  dropout: 0.4
+  attn_dropout: 0.4
+  dist_bar: [ 1, 2, 3 ]
   encoder_normalize_before: True
   apply_graphormer_init: True
   activation_fn: GELU
