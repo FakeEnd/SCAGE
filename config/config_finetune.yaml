@@ -1,19 +1,20 @@
-task_name: clintox    # 分类：bace, bbbp, clintox, tox21, toxcast, sider
+task_name: bace    # 分类：bace, bbbp, clintox, tox21, toxcast, sider
                    # 回归：freesolv, esol, lipophilicity
 
 batch_size: 16
-seed: 12
+seed: 0
 epochs: 200
 patience: 15
 
-root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/finetune_data/
+#root: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/finetune_data/
+#root: /mnt/solid/tss/Project-2023/SCAGE/data/finetune_data/
+root: /mnt/8t/qjb/workspace/SCAGE/data/mpp/
 is_pretrain: False
 split_type: random_scaffold            # random, scaffold, random_scaffold
 save_ckpt: 50
 save_model: best_valid
-#pretrain_model_path: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_result/adcl_fg_result/pubchem_250_trick_9_Oct30_22:27/checkpoint/model_40.pth
+#pretrain_model_path: /mnt/solid/tss/Project-2023/SCAGE/pretrain_model/model.pth
 #pretrain_model_path: /archive/bioinformatics/Zhou_lab/shared/jjin/SAGE/pretrain_model/original/pubchem_250_9_Nov02_10_46/model.pth
-#pretrain_model_path: /archive/bioinformatics/Zhou_lab/shared/jjin/SCAGE/pretrain_model/cl/cl/pubchem_downstream_9_Nov17_23_37/model.pth
 pretrain_model_path: None
 
 checkpoint: False

@@ -284,6 +284,81 @@ class MoleculeDataset(InMemoryDataset):
 
     def process(self):
         data_list = []
+        smiles_list, rdkit_mol_objs, labels = _load_finetune_dataset_zxx(self.raw_paths[0], self.target)
+        for i in range(len(rdkit_mol_objs)):
+            print(i)
+            rdkit_mol = rdkit_mol_objs[i]
+            if rdkit_mol is not None:
+                data = mol_to_graph_data(rdkit_mol)
+                data.id = torch.tensor([i])
+                data.label = torch.tensor(labels[i])
+                data.smiles = smiles_list[i]
+                data_list.append(data)
+
+        if self.pre_filter is not None:
+            data_list = [data for data in data_list if self.pre_filter(data)]
+
+        if self.pre_transform is not None:
+            data_list = [self.pre_transform(data) for data in data_list]
+
+        data, slices = self.collate(data_list)
+        torch.save((data, slices), self.processed_paths[0])
+
+class FinetuneDataset(InMemoryDataset):
+    def __init__(self,
+                 root,
+                 split_type,
+                 target=None,
+                 transform=None,
+                 pre_transform=None,
+                 pre_filter=None,
+                 is_pretrain=False,
+                 ):
+        self.is_pretrain = is_pretrain
+        self.dataset = root.split('/')[1]
+        self.root = root
+        self.split_type = split_type
+        assert split_type in ['train', 'valid', 'test']
+        self.target = target
+        # self.pre_process()
+
+        super(FinetuneDataset, self).__init__(root, transform, pre_transform, pre_filter)
+
+        self.transform, self.pre_transform, self.pre_filter = transform, pre_transform, pre_filter
+        self.data, self.slices = torch.load(
+            os.path.join(self.processed_dir, '{}_data_processed.pt'.format(split_type)))
+
+    def get(self, idx):
+        data = Data()
+        for key in self.data.keys:
+            item, slices = self.data[key], self.slices[key]
+            if torch.is_tensor(item):
+                s = list(repeat(slice(None), item.dim()))
+                s[data.__cat_dim__(key, item)] = slice(slices[idx], slices[idx + 1])
+            else:
+                s = slice(slices[idx], slices[idx + 1])
+            data[key] = item[s]
+        return data
+
+    @property
+    def raw_file_names(self):
+        file_name_list = os.listdir(self.raw_dir)
+        return file_name_list
+
+    @property
+    def processed_file_names(self):
+        if self.split_type == 'train':
+            return 'train_data_processed.pt'
+        elif self.split_type == 'valid':
+            return 'valid_data_processed.pt'
+        else:
+            return 'test_data_processed.pt'
+
+    def download(self):
+        pass
+
+    def process(self):
+        data_list = []
         smiles_list, rdkit_mol_objs, labels = _load_finetune_dataset(self.raw_paths[0], self.target)
         for i in range(len(rdkit_mol_objs)):
             print(i)
@@ -489,6 +564,33 @@ def _load_finetune_dataset(input_path, target):
     assert len(smiles_list) == len(rdkit_mol_objs_list)
     assert len(smiles_list) == len(labels)
     return smiles_list, rdkit_mol_objs_list, labels.values
+
+def _load_finetune_dataset_zxx(input_path, target):
+    input_df = pd.read_csv(input_path, sep=',')
+    smiles_list = input_df['smiles']
+    rdkit_mol_objs_list = [AllChem.MolFromSmiles(s) for s in smiles_list]
+
+    labels = input_df['label']
+
+    labels_new = []
+    for item in labels:
+        if type(item) == str:
+            item = item.split(' ')
+            item = [float(x) for x in item]
+            item = [-1. if x == 0. else 0. for x in item]
+        else:
+            item = [-1. if item == 0. else 0]
+        labels_new.append(item)
+        # item = torch.tensor(item)
+        # print(len(item))
+    # labels = torch.tensor(labels.values)
+    # print(labels)
+    labels = np.array(labels_new)
+    # print(labels)
+
+    assert len(smiles_list) == len(rdkit_mol_objs_list)
+    assert len(smiles_list) == len(labels)
+    return smiles_list, rdkit_mol_objs_list, labels
 
 
 def _load_cliff_dataset(input_path, split):
