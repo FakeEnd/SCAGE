@@ -4,6 +4,12 @@
 
 SCAGE is a self-conformation-aware pre-training framework for molecular property prediction reveals the quantitate structure-activity relationship like human experts
 
+
+#### Reference paper
+- [Geometry-enhanced molecular representation learning for property prediction](https://www.nature.com/articles/s42256-021-00438-4)
+- [Accurate prediction of molecular properties and drug targets using a self-supervised image representation learning framework](https://www.nature.com/articles/s42256-022-00557-6)
+
+
 ## Some command lines
 
 You can directly use the following command lines to run the code in bash script.
