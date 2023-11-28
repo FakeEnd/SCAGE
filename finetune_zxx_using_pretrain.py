@@ -32,12 +32,12 @@ params_nni = {
     'task': 'lipophilicity',
 
     'init_lr': 0.0002,
-    # 'init_base_lr': 0.0001,
+    'init_base_lr': 0.0001,
     'weight_decay': 2e-5,
 
-    # 'scheduler_type': None,
-    # 'warm_up_epoch': 5,
-    # 'start_lr': 5e-4,
+    'scheduler_type': None,
+    'warm_up_epoch': 5,
+    'start_lr': 5e-4,
 
     'num_layers': 3,
     'hidden_dim': 256,
@@ -394,13 +394,22 @@ if __name__ == '__main__':
     config['optim']['init_lr'] = params_nni['init_lr']
     config['optim']['weight_decay'] = params_nni['weight_decay']
 
-    # config['lr_scheduler']['type'] = params_nni['scheduler_type']
-    # config['lr_scheduler']['warm_up_epoch'] = params_nni['warm_up_epoch']
-    # config['lr_scheduler']['start_lr'] = params_nni['start_lr']
+    config['lr_scheduler']['type'] = params_nni['scheduler_type']
+    config['lr_scheduler']['warm_up_epoch'] = params_nni['warm_up_epoch']
+    config['lr_scheduler']['start_lr'] = params_nni['start_lr']
 
     config['DownstreamModel']['num_layers'] = params_nni['num_layers']
     config['DownstreamModel']['hidden_dim'] = params_nni['hidden_dim']
     config['DownstreamModel']['dropout'] = params_nni['dropout']
+
+    pretrain_model_path = ['/archive/bioinformatics/Zhou_lab/shared/jjin/SCAGE/pretrain_model/cl/cl/pubchem_250_trick_9_Nov24_23_24/model.pth',
+                           '/archive/bioinformatics/Zhou_lab/shared/jjin/SCAGE/pretrain_model/cl/cl/pubchem_250_trick_9_Nov24_23_25/model.pth']
+
+    pretrain_model_dropout = [0.4, 0.3]
+
+    model_index =  params_nni['pretrain_model']
+    config['pretrain_model_path'] = pretrain_model_path[model_index]
+    config['model']['dropout'] = config['model']['attn_dropout'] = config['model']['emb_dropout'] = pretrain_model_dropout[model_index]
 
     print(config['task_name'])
     # set_seed(params_nni['seed'])

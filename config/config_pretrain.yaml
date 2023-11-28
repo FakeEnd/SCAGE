@@ -1,8 +1,8 @@
 #task_name: pubchem_1000
 #task_name: pubchem_1000_trick
 #task_name: pubchem_250
-#task_name: pubchem_250_trick
-task_name: pubchem_downstream
+task_name: pubchem_250_trick
+#task_name: pubchem_downstream
 #task_name: cliff_data
 #batch_size: 256                     # batch size
 batch_size: 128                     # batch size
@@ -57,9 +57,9 @@ model:
   hidden_dim: 128
   ffn_hidden_dim: 128
   num_attn_heads: 4
-  emb_dropout: 0.4
-  dropout: 0.4
-  attn_dropout: 0.4
+  emb_dropout: 0.3
+  dropout: 0.3
+  attn_dropout: 0.3
   dist_bar: [ 1, 2, 3 ]
   encoder_normalize_before: True
   apply_graphormer_init: True

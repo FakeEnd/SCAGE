@@ -11,7 +11,7 @@ trainingServicePlatform: local  # 指定运行 Experiment 的平台，包括 loc
 #experimentWorkingDirectory: .
 
 # 搜索空间文件
-searchSpacePath: search_space.json
+searchSpacePath: search_space_using_pretrain.json
 useAnnotation: false # 如果 useAnnotation 为 true，searchSpacePath 字段会被删除。
 
 # 日志
@@ -30,7 +30,7 @@ tuner:
 # 运行的命令，以及 Trial 代码的路径
 trial:
 #  command: python finetune_nni.py
-  command: python finetune_zxx.py
+  command: python finetune_zxx_using_pretrain.py
   codeDir: . #  必需字符串。 指定 Trial 文件的目录。
   gpuNum: 1 #  可选、整数。 指定了运行每个 Trial 进程的 GPU 数量。 默认值为 0。
 
